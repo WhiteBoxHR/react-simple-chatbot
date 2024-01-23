@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const TextStepContainer = styled.div`
   align-items: flex-end;
-  display: flex;
+  display: ${props => (props.step.metadata?.hideStep ? 'none' : 'flex')};;
   justify-content: ${props => (props.user ? 'flex-end' : 'flex-start')};
 `;
 
