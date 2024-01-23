@@ -534,6 +534,7 @@ class ChatBot extends Component {
       customStyle,
       hideBotAvatar,
       hideUserAvatar,
+      hideUserText,
       speechSynthesis
     } = this.props;
     const { options, component, asMessage } = step;
@@ -580,6 +581,7 @@ class ChatBot extends Component {
         bubbleStyle={bubbleStyle}
         hideBotAvatar={hideBotAvatar}
         hideUserAvatar={hideUserAvatar}
+        hideUserText={hideUserText}
         speechSynthesis={speechSynthesis}
         isFirst={this.isFirstPosition(step)}
         isLast={this.isLastPosition(step)}
