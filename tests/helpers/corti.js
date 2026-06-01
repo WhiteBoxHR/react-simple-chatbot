@@ -98,10 +98,12 @@ const newSpeechRecognition = function () {
       return;
     }
     _self._started = false;
-    // Create and dispatch an event
-    const event = document.createEvent('CustomEvent');
-    event.initCustomEvent('end', false, false, null);
-    _listeners.dispatchEvent(event);
+    // Dispatch 'end' asynchronously, as a real browser would
+    setTimeout(function () {
+      const event = document.createEvent('CustomEvent');
+      event.initCustomEvent('end', false, false, null);
+      _listeners.dispatchEvent(event);
+    }, 0);
   };
 
   this.stop = function () {
@@ -140,36 +142,41 @@ const newSpeechRecognition = function () {
       results.push(sentence + etc);
     }
 
-    // Create the event
-    const event = document.createEvent('CustomEvent');
-    event.initCustomEvent('result', false, false, { sentence });
-    event.resultIndex = 0;
-    event.results = {
-      item: itemFunction,
-      0: {
+    const makeResultEvent = function (isFinal) {
+      const event = document.createEvent('CustomEvent');
+      event.initCustomEvent('result', false, false, { sentence });
+      event.resultIndex = 0;
+      event.results = {
         item: itemFunction,
-        final: true,
-      },
-    };
-    for (commandIterator = 0; commandIterator < _maxAlternatives; commandIterator++) {
-      event.results[0][commandIterator] = {
-        transcript: results[commandIterator],
-        confidence: Math.max(1 - 0.01 * commandIterator, 0.001),
+        0: {
+          item: itemFunction,
+          isFinal: isFinal,
+        },
       };
-    }
-    Object.defineProperty(event.results, 'length', {
-      get() {
-        return 1;
-      },
-    });
-    Object.defineProperty(event.results[0], 'length', {
-      get() {
-        return _maxAlternatives;
-      },
-    });
-    event.interpretation = null;
-    event.emma = null;
-    _listeners.dispatchEvent(event);
+      for (commandIterator = 0; commandIterator < _maxAlternatives; commandIterator++) {
+        event.results[0][commandIterator] = {
+          transcript: results[commandIterator],
+          confidence: Math.max(1 - 0.01 * commandIterator, 0.001),
+        };
+      }
+      Object.defineProperty(event.results, 'length', {
+        get() {
+          return 1;
+        },
+      });
+      Object.defineProperty(event.results[0], 'length', {
+        get() {
+          return _maxAlternatives;
+        },
+      });
+      event.interpretation = null;
+      event.emma = null;
+      return event;
+    };
+
+    // Fire an interim result first (triggers onChange), then a final result (triggers onFinal/onEnd)
+    _listeners.dispatchEvent(makeResultEvent(false));
+    _listeners.dispatchEvent(makeResultEvent(true));
   };
 
   this.addEventListener = function (event, callback) {

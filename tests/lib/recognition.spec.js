@@ -37,7 +37,7 @@ describe('Recognition', () => {
       expect(onEnd.called).to.be.equal(false);
     });
 
-    it('should call end after 1s', () => {
+    it('should call end after 1s', (done) => {
       const onChange = spy();
       const onEnd = spy();
       const recognition = new Recognition(onChange, onEnd);
@@ -45,6 +45,7 @@ describe('Recognition', () => {
       recognition.recognition.say('hi, this is a test');
       setTimeout(() => {
         expect(onEnd.called).to.be.equal(true);
+        done();
       }, 1000);
     });
   });

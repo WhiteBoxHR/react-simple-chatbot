@@ -724,6 +724,7 @@ class ChatBot extends Component {
   }
 }
 
+/* eslint-disable react/forbid-prop-types */
 ChatBot.propTypes = {
   avatarStyle: PropTypes.objectOf(PropTypes.any),
   botAvatar: PropTypes.string,

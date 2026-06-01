@@ -1,16 +1,17 @@
 /* eslint-disable */
-import { configure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
+const enzyme = require('enzyme');
+const Adapter = require('enzyme-adapter-react-16');
 
-configure({ adapter: new Adapter() });
+enzyme.configure({ adapter: new Adapter() });
 
-const jsdom = require('jsdom').jsdom;
+const { JSDOM } = require('jsdom');
 
+const dom = new JSDOM('', { url: 'http://localhost' });
 const exposedProperties = ['window', 'navigator', 'document'];
 const storage = {};
 
-global.document = jsdom('');
-global.window = document.defaultView;
+global.document = dom.window.document;
+global.window = dom.window;
 global.localStorage = {
   getItem(key) {
     return storage[key];
@@ -19,13 +20,14 @@ global.localStorage = {
     storage[key] = item;
   },
 };
-Object.keys(document.defaultView).forEach((property) => {
+Object.keys(dom.window).forEach((property) => {
   if (typeof global[property] === 'undefined') {
     exposedProperties.push(property);
-    global[property] = document.defaultView[property];
+    global[property] = dom.window[property];
   }
 });
 
-global.navigator = {
-  userAgent: 'node.js',
-};
+Object.defineProperty(global, 'navigator', {
+  value: { userAgent: 'node.js' },
+  writable: true,
+});
